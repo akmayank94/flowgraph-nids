@@ -1,0 +1,130 @@
+{
+ "created_utc": "2026-10-26 05:03",
+ "datasets": [
+  {
+   "dataset": "unsw_nb15",
+   "label": "UNSW-NB15",
+   "file": "replay_unsw_nb15.json",
+   "scenarios": [
+    {
+     "title": "Fuzzers",
+     "n": 139
+    },
+    {
+     "title": "Shellcode",
+     "n": 75
+    },
+    {
+     "title": "Generic",
+     "n": 337
+    },
+    {
+     "title": "Reconnaissance",
+     "n": 576
+    },
+    {
+     "title": "Exploits",
+     "n": 664
+    },
+    {
+     "title": "Analysis",
+     "n": 687
+    },
+    {
+     "title": "Backdoor",
+     "n": 700
+    },
+    {
+     "title": "Benign only",
+     "n": 6000
+    }
+   ]
+  },
+  {
+   "dataset": "cse_cic_ids2018",
+   "label": "CSE-CIC-IDS2018",
+   "file": "replay_cse_cic_ids2018.json",
+   "scenarios": [
+    {
+     "title": "FTP-port21-refused (FTP-BruteForce + DoS-SlowHTTPTest)",
+     "n": 4500
+    },
+    {
+     "title": "SSH-Bruteforce",
+     "n": 4145
+    },
+    {
+     "title": "DoS_attacks-GoldenEye",
+     "n": 1434
+    },
+    {
+     "title": "DoS_attacks-Slowloris",
+     "n": 1647
+    },
+    {
+     "title": "DoS_attacks-Hulk",
+     "n": 3159
+    },
+    {
+     "title": "DDoS_attacks-LOIC-HTTP",
+     "n": 4500
+    },
+    {
+     "title": "DDOS_attack-LOIC-UDP",
+     "n": 130
+    },
+    {
+     "title": "DDOS_attack-HOIC",
+     "n": 4500
+    },
+    {
+     "title": "Benign only",
+     "n": 6000
+    }
+   ]
+  },
+  {
+   "dataset": "ton_iot",
+   "label": "ToN-IoT",
+   "file": "replay_ton_iot.json",
+   "scenarios": [
+    {
+     "title": "scanning",
+     "n": 4500
+    },
+    {
+     "title": "dos",
+     "n": 2017
+    },
+    {
+     "title": "injection",
+     "n": 3974
+    },
+    {
+     "title": "ddos",
+     "n": 4500
+    },
+    {
+     "title": "password",
+     "n": 4595
+    },
+    {
+     "title": "xss",
+     "n": 4888
+    },
+    {
+     "title": "ransomware",
+     "n": 277
+    },
+    {
+     "title": "Backdoor",
+     "n": 532
+    },
+    {
+     "title": "Benign only",
+     "n": 6000
+    }
+   ]
+  }
+ ]
+}

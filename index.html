@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowgraph NIDS</title>
+<meta name="description" content="Replay console and evaluation results for a causal temporal-graph network intrusion detection system on NetFlow v3 data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='8' cy='22' r='4' fill='%232a78d6'/%3E%3Ccircle cx='24' cy='10' r='5' fill='%23e34948'/%3E%3Cpath d='M8 22L24 10' stroke='%2313233a' stroke-width='2'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 40 40" class="mark" aria-hidden="true"><path d="M4 30 L14 22 L22 26 L36 8" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="4" cy="30" r="3"/><circle cx="14" cy="22" r="3"/><circle cx="22" cy="26" r="3"/><circle cx="36" cy="8" r="4.5" class="hot"/></svg>
+    <div>
+      <h1>Flowgraph NIDS</h1>
+      <p class="sub">Intrusion detection on a causal graph of network flows</p>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="live">Replay</button>
+    <button role="tab" aria-selected="false" data-tab="eval">Results</button>
+    <button role="tab" aria-selected="false" data-tab="how">How it works</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ REPLAY ============ -->
+<section id="tab-live" class="tab on">
+  <div class="controls">
+    <div class="seg" id="netSeg" role="radiogroup" aria-label="Network"></div>
+    <label class="field">Scenario <select id="scenario"></select></label>
+    <div class="play">
+      <button id="playBtn" class="primary" aria-label="Pause">Pause</button>
+      <button id="restartBtn">Restart</button>
+      <label class="field">Speed <select id="speed">
+        <option value="auto">Fit to 45 s</option><option value="1">1× real time</option><option value="10">10×</option><option value="100">100×</option>
+      </select></label>
+      <label class="check"><input type="checkbox" id="truth" checked> Show ground truth</label>
+    </div>
+  </div>
+
+  <p class="note" id="replayNote"></p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="stage">
+    <div class="graphwrap">
+      <div class="graphhead">
+        <h2>Causal flow graph</h2>
+        <div class="legend" id="legend"></div>
+      </div>
+      <canvas id="graph" aria-label="Flows over time per source host, with edges to their causal neighbours"></canvas>
+      <div class="clock"><span id="clock">+0.0 s</span><div class="bar"><div id="progress"></div></div><span id="dur"></span></div>
+      <div id="tip" class="tip" role="tooltip" hidden></div>
+    </div>
+    <aside class="side">
+      <div class="panel">
+        <h2>Hosts by risk</h2>
+        <p class="hint" id="riskHint"></p>
+        <ol id="hosts" class="hosts"></ol>
+      </div>
+      <div class="panel">
+        <h2>Alerts</h2>
+        <ol id="alerts" class="alerts"><li class="empty">No alerts yet. A host is reported when its risk reaches the alert level.</li></ol>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="tab-eval" class="tab" hidden>
+  <div class="prose">
+    <h2 class="big">What the numbers say</h2>
+    <p>All thresholds are chosen on validation flows at a 1% false-positive target and then applied unchanged to untouched test flows,
+      which keep their real benign/attack ratio. Splits are chronological with a purge gap, the graph only links a flow to earlier flows,
+      and preprocessing is fitted on training data only.</p>
+  </div>
+  <div id="evalBody"></div>
+</section>
+
+<!-- ============ HOW ============ -->
+<section id="tab-how" class="tab" hidden>
+  <div class="prose" id="howBody"></div>
+</section>
+</main>
+<footer class="foot">M.Sc. Computer Science final project, version 1. Data: NF-UNSW-NB15-v3, NF-CSE-CIC-IDS2018-v3 and NF-ToN-IoT-v3 (University of Queensland NetFlow v3 datasets).</footer>
+<script src="app.js"></script>
+</body>
+</html>
