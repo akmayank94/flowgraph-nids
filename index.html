@@ -1,93 +1,158 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flowgraph NIDS</title>
-<meta name="description" content="Replay console and evaluation results for a causal temporal-graph network intrusion detection system on NetFlow v3 data.">
+<meta name="description" content="A network intrusion detection console: a causal graph of NetFlow records scored by a temporal GNN, with evidence for every alert and honest, measured performance.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='8' cy='22' r='4' fill='%232a78d6'/%3E%3Ccircle cx='24' cy='10' r='5' fill='%23e34948'/%3E%3Cpath d='M8 22L24 10' stroke='%2313233a' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L28 7 V16 C28 23 22.5 28 16 30 C9.5 28 4 23 4 16 V7 Z' fill='%230e1a2c' stroke='%2346d1e6' stroke-width='2'/%3E%3Cpath d='M9 20 L14 15 L18 18 L23 11' fill='none' stroke='%2346d1e6' stroke-width='2'/%3E%3Ccircle cx='23' cy='11' r='2.6' fill='%23ff5a5f'/%3E%3C/svg%3E">
+<script>try { const t = localStorage.getItem("fg-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="top">
-  <div class="brand">
-    <svg viewBox="0 0 40 40" class="mark" aria-hidden="true"><path d="M4 30 L14 22 L22 26 L36 8" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="4" cy="30" r="3"/><circle cx="14" cy="22" r="3"/><circle cx="22" cy="26" r="3"/><circle cx="36" cy="8" r="4.5" class="hot"/></svg>
-    <div>
-      <h1>Flowgraph NIDS</h1>
-      <p class="sub">Intrusion detection on a causal graph of network flows</p>
-    </div>
+  <div class="top-in">
+    <a class="brand" href="#" aria-label="Flowgraph NIDS, console">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 L28 7 V16 C28 23 22.5 28 16 30 C9.5 28 4 23 4 16 V7 Z" fill="var(--panel)" stroke="var(--signal)" stroke-width="1.8"/><path d="M9 20 L14 15 L18 18 L23 11" fill="none" stroke="var(--signal)" stroke-width="1.8"/><circle cx="23" cy="11" r="2.6" fill="var(--threat)"/></svg>
+      <span><b>Flowgraph NIDS</b><small>Version 2, causal flow graph detector</small></span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" aria-selected="true" data-tab="console">Console</button>
+      <button role="tab" aria-selected="false" data-tab="retrain">Label &amp; retrain</button>
+      <button role="tab" aria-selected="false" data-tab="perf">Performance</button>
+      <button role="tab" aria-selected="false" data-tab="findings">Findings</button>
+      <button role="tab" aria-selected="false" data-tab="guide">Guide</button>
+    </nav>
+    <button class="themebtn" id="themeBtn" aria-label="Switch to light theme" title="Switch theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+    </button>
   </div>
-  <nav class="tabs" role="tablist">
-    <button role="tab" aria-selected="true" data-tab="live">Replay</button>
-    <button role="tab" aria-selected="false" data-tab="eval">Results</button>
-    <button role="tab" aria-selected="false" data-tab="how">How it works</button>
-  </nav>
 </header>
 
-<main>
-<!-- ============ REPLAY ============ -->
-<section id="tab-live" class="tab on">
-  <div class="controls">
-    <div class="seg" id="netSeg" role="radiogroup" aria-label="Network"></div>
-    <label class="field">Scenario <select id="scenario"></select></label>
-    <div class="play">
-      <button id="playBtn" class="primary" aria-label="Pause">Pause</button>
-      <button id="restartBtn">Restart</button>
-      <label class="field">Speed <select id="speed">
-        <option value="auto">Fit to 45 s</option><option value="1">1× real time</option><option value="10">10×</option><option value="100">100×</option>
-      </select></label>
-      <label class="check"><input type="checkbox" id="truth" checked> Show ground truth</label>
+<main id="main">
+<!-- ================= CONSOLE ================= -->
+<section id="tab-console" class="tab" role="tabpanel">
+  <div class="hero">
+    <div>
+      <h1>See the attack, and see why it was flagged.</h1>
+      <p>Every finished network flow is linked to the flows that came just before it. A graph neural network scores it, risk builds per host, and every alert comes with evidence an analyst can check.</p>
+      <div class="status" id="status"></div>
+      <button class="replay-anim" id="replayAnim">Play the signal path again</button>
     </div>
+    <svg class="pipe" id="pipe" viewBox="0 0 760 236" role="img" aria-labelledby="pipeT pipeD">
+      <title id="pipeT">From one flow to one alert</title>
+      <desc id="pipeD">A flow arrives, is linked to earlier flows of the same source, destination and conversation, gets a TF-GNN score of 0.97, raises its host's risk past the alert level, and produces an alert with an evidence card.</desc>
+      <path id="wire" class="wire" d="M 80 104 L 230 104 L 380 104 L 530 104 L 680 104"/>
+      <g class="s1"><rect class="st" x="16" y="34" width="128" height="140" rx="12"/>
+        <rect x="34" y="88" width="16" height="10" rx="2" class="node"/><rect x="56" y="88" width="16" height="10" rx="2" class="node"/><rect x="78" y="88" width="16" height="10" rx="2" class="node"/><rect x="100" y="88" width="24" height="10" rx="2" class="hotnode"/>
+        <text x="80" y="124" text-anchor="middle" class="mono" style="font-family:var(--mono);font-size:11px">10.0.0.7 → :22</text>
+        <text x="80" y="196" text-anchor="middle" class="ttl">Flow arrives</text><text x="80" y="214" text-anchor="middle">a NetFlow record</text></g>
+      <g class="s2"><rect class="st" x="166" y="34" width="128" height="140" rx="12"/>
+        <path class="edge" d="M 192 72 L 262 104 M 196 104 L 262 104 M 192 138 L 262 104"/>
+        <circle cx="192" cy="72" r="6" class="node"/><circle cx="196" cy="104" r="6" class="node"/><circle cx="192" cy="138" r="6" class="node"/><circle cx="264" cy="104" r="8" class="hotnode"/>
+        <text x="230" y="196" text-anchor="middle" class="ttl">Linked to its past</text><text x="230" y="214" text-anchor="middle">earlier flows only</text></g>
+      <g class="s3"><rect class="st" x="316" y="34" width="128" height="140" rx="12"/>
+        <path class="gauge-bg" d="M 340 122 A 40 40 0 0 1 420 122"/><path class="gauge" pathLength="120" d="M 340 122 A 40 40 0 0 1 420 122"/>
+        <text x="380" y="118" text-anchor="middle" class="ttl" style="font-size:20px">0.97</text><text x="380" y="146" text-anchor="middle" style="font-size:11px">above threshold</text>
+        <text x="380" y="196" text-anchor="middle" class="ttl">TF-GNN scores it</text><text x="380" y="214" text-anchor="middle">2 graph layers</text></g>
+      <g class="s4"><rect class="st" x="466" y="34" width="128" height="140" rx="12"/>
+        <rect class="meter-bg" x="486" y="98" width="88" height="12" rx="4"/><rect class="meter" x="486" y="98" width="80" height="12" rx="4"/><line class="lvl" x1="545" x2="545" y1="90" y2="118"/>
+        <text x="545" y="84" text-anchor="middle" style="font-size:11px">alert level</text><text x="530" y="138" text-anchor="middle" style="font-size:11px">risk fades over time</text>
+        <text x="530" y="196" text-anchor="middle" class="ttl">Host risk builds</text><text x="530" y="214" text-anchor="middle">one alert per host</text></g>
+      <g class="s5"><rect class="st" x="616" y="34" width="128" height="140" rx="12"/>
+        <circle class="ring" cx="652" cy="80" r="17"/>
+        <path class="shield" d="M 652 64 L 666 70 V 80 C 666 88 660 94 652 97 C 644 94 638 88 638 80 V 70 Z"/>
+        <rect class="card" x="634" y="110" width="94" height="52" rx="6"/>
+        <g class="cardtxt"><rect class="cl a" x="642" y="119" width="58" height="6" rx="2"/><rect class="cl" x="642" y="131" width="76" height="5" rx="2"/><rect class="cl" x="642" y="141" width="66" height="5" rx="2"/><rect class="cl" x="642" y="151" width="48" height="5" rx="2"/></g>
+        <text x="696" y="78" class="ttl" style="font-size:12px">ALERT</text>
+        <text x="680" y="196" text-anchor="middle" class="ttl">Alert + evidence</text><text x="680" y="214" text-anchor="middle">looks like · stands out</text></g>
+      <circle class="packet" r="6"><animateMotion id="packetMove" dur="4s" begin="indefinite" fill="freeze" calcMode="linear" keyPoints="0;1" keyTimes="0;1"><mpath href="#wire"/></animateMotion></circle>
+    </svg>
   </div>
 
+  <div class="controls" role="group" aria-label="Replay controls">
+    <div class="seg" id="netSeg" role="radiogroup" aria-label="Network"></div>
+    <label class="field">Scenario <select id="scenario"></select></label>
+    <button id="playBtn" class="btn primary">Pause</button>
+    <button id="restartBtn" class="btn">Restart</button>
+    <label class="field">Speed <select id="speed"><option value="auto">Fit to 45 s</option><option value="1">1× real time</option><option value="10">10×</option><option value="100">100×</option></select></label>
+    <label class="check"><input type="checkbox" id="truth" checked> Show ground truth</label>
+  </div>
   <p class="note" id="replayNote"></p>
-
-  <div class="kpis" id="kpis"></div>
+  <div class="counters" id="counters" aria-live="off"></div>
 
   <div class="stage">
-    <div class="graphwrap">
-      <div class="graphhead">
-        <h2>Causal flow graph</h2>
-        <div class="legend" id="legend"></div>
-      </div>
-      <canvas id="graph" aria-label="Flows over time per source host, with edges to their causal neighbours"></canvas>
+    <div class="panel graphwrap">
+      <div class="ph"><h2>Causal flow graph</h2><div class="legend" id="legend"></div></div>
+      <canvas id="graph" aria-label="Flows over time, one lane per source host, linked to their causal neighbours. Click a red flow to inspect it."></canvas>
       <div class="clock"><span id="clock">+0.0 s</span><div class="bar"><div id="progress"></div></div><span id="dur"></span></div>
       <div id="tip" class="tip" role="tooltip" hidden></div>
     </div>
     <aside class="side">
-      <div class="panel">
-        <h2>Hosts by risk</h2>
-        <p class="hint" id="riskHint"></p>
-        <ol id="hosts" class="hosts"></ol>
-      </div>
-      <div class="panel">
-        <h2>Alerts</h2>
-        <ol id="alerts" class="alerts"><li class="empty">No alerts yet. A host is reported when its risk reaches the alert level.</li></ol>
-      </div>
+      <div class="panel"><div class="ph"><h2>Alert queue</h2><span class="faint" id="qcount"></span></div><ol class="list queue" id="queue"></ol></div>
+      <div class="panel"><div class="ph"><h2>Hosts by risk</h2><span class="faint" id="riskHint"></span></div><ol class="list hosts" id="hosts"></ol></div>
     </aside>
   </div>
-</section>
 
-<!-- ============ RESULTS ============ -->
-<section id="tab-eval" class="tab" hidden>
-  <div class="prose">
-    <h2 class="big">What the numbers say</h2>
-    <p>All thresholds are chosen on validation flows at a 1% false-positive target and then applied unchanged to untouched test flows,
-      which keep their real benign/attack ratio. Splits are chronological with a purge gap, the graph only links a flow to earlier flows,
-      and preprocessing is fitted on training data only.</p>
+  <div class="panel inspect" id="inspect">
+    <div class="ph"><h2 id="inspectTitle">Investigate</h2>
+      <div class="itabs" role="tablist" aria-label="Inspector"><button role="tab" aria-selected="true" data-it="ev">Evidence</button><button role="tab" aria-selected="false" data-it="host">Host timeline</button></div></div>
+    <div id="inspectBody"></div>
   </div>
-  <div id="evalBody"></div>
 </section>
 
-<!-- ============ HOW ============ -->
-<section id="tab-how" class="tab" hidden>
-  <div class="prose" id="howBody"></div>
+<!-- ================= RETRAIN ================= -->
+<section id="tab-retrain" class="tab" role="tabpanel" hidden>
+  <div class="page-h"><h1>Teach it a new attack</h1>
+    <p class="lede">A supervised detector misses attack types it was never shown. In version 2 we measured the fix analysts actually use: label a few flows of the new attack, retrain, and check again. Choose an attack family, a model and how many labelled flows the analyst gives it. All numbers are recorded results from the experiments, not live training.</p></div>
+  <div class="panel">
+    <div class="rt-controls">
+      <div class="seg" id="rtNet" role="radiogroup" aria-label="Network"></div>
+      <label class="field">Attack family <select id="rtFam"></select></label>
+      <div class="seg" id="rtModel" role="radiogroup" aria-label="Model"></div>
+      <div class="field">Labelled flows <div class="seg krow" id="rtK" role="radiogroup" aria-label="Labelled flows"></div></div>
+    </div>
+    <div class="legend2"><span><i style="background:color-mix(in srgb,var(--ink-3) 55%,transparent)"></i>never seen (0 labels)</span><span><i style="background:var(--signal)"></i>after retraining</span><span id="rtRangeLeg"><i style="background:none;border-left:2px solid var(--ink);border-right:2px solid var(--ink);height:12px;width:14px"></i>range over 5 training runs</span><span><i style="background:none;border-left:1px dashed var(--ink-2);width:2px"></i>0.80 goal</span></div>
+    <div class="bars" id="rtBars"></div>
+    <p class="faint" id="rtRun" style="margin-top:12px"></p>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="panel"><h2>A new network</h2><p class="lede">The model trained on another network, plus the new network's normal traffic, plus k labelled attack flows from it. Recall at 1% false alarms on the new network.</p><div id="rtNew"></div></div>
+    <div class="panel"><h2>Why ToN-IoT is harder</h2><p class="lede">Same LightGBM runs with 1,000 labels, choosing which flows get labelled. Where "spread over time" wins, the attack changes over time; where even the full training set fails, the flow features cannot separate it.</p><div id="rtDiag"></div></div>
+  </div>
+</section>
+
+<!-- ================= PERFORMANCE ================= -->
+<section id="tab-perf" class="tab" role="tabpanel" hidden>
+  <div class="page-h"><h1>How well it works, and how sure we are</h1>
+    <p class="lede">Thresholds are fixed on validation data at 1% false alarms and applied unchanged to later, untouched test traffic at its real attack ratio. Every number below was fixed as a pass test before it was measured.</p></div>
+  <div id="perfBody" class="stack"></div>
+</section>
+
+<!-- ================= FINDINGS ================= -->
+<section id="tab-findings" class="tab" role="tabpanel" hidden>
+  <div class="page-h"><h1>What version 2 tested, in order</h1>
+    <p class="lede">Each phase stated its pass test before running. A fail is a hypothesis the data rejected, with the reason measured, not a broken experiment.</p></div>
+  <ol class="timeline" id="timeline"></ol>
+</section>
+
+<!-- ================= GUIDE ================= -->
+<section id="tab-guide" class="tab" role="tabpanel" hidden>
+  <div class="page-h"><h1>How it works</h1></div>
+  <div class="grid2">
+    <div class="panel" id="howBody"></div>
+    <div class="panel" id="limitsBody"></div>
+  </div>
+  <div class="page-h"><h1>Glossary</h1><p class="lede" id="glCount"></p></div>
+  <div class="gl-controls"><input type="search" id="glSearch" placeholder="Search a term, e.g. recall, purge gap, evidence card" aria-label="Search the glossary"><select id="glGroup" aria-label="Topic"></select></div>
+  <div class="terms" id="terms"></div>
 </section>
 </main>
-<footer class="foot">M.Sc. Computer Science final project, version 1. Data: NF-UNSW-NB15-v3, NF-CSE-CIC-IDS2018-v3 and NF-ToN-IoT-v3 (University of Queensland NetFlow v3 datasets).</footer>
+<footer class="foot">Flowgraph NIDS version 2, an M.Sc. Computer Science final project, University of Delhi. Replays recorded engine output on held-out test flows of NF-UNSW-NB15-v3, NF-CSE-CIC-IDS2018-v3 and NF-ToN-IoT-v3 (University of Queensland); it does not capture live traffic.</footer>
 <script src="app.js"></script>
 </body>
 </html>
